@@ -13,7 +13,7 @@ VERSION HISTORY:
 var isMobile = true; // based on screen orientation, used for formatting window display
 
 // Game controls
-var game_position = -1;
+var game_position = 0;
 // -1 = credits screen
 // 0 = title screen
 // 1 = initial position
