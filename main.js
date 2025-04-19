@@ -143,8 +143,10 @@ function set_scale() {
     if(isMobile){ // vertical format
 
         // Set text size
-        txt_sz = w*h*0.00008; // scales with area
-        if(txt_sz > 55){ txt_sz = 55; } // upper bound
+        //txt_sz = w*h*0.00008; // scales with area
+        //if(txt_sz > 40){ txt_sz = 40; } // lower bound
+        //if(txt_sz > 55){ txt_sz = 55; } // upper bound
+        txt_sz = 65;
         title_txt_sz = 3*txt_sz;
 
         // Set text positions
@@ -154,7 +156,7 @@ function set_scale() {
 
         // Set image size and position
         img_wd = (opt_y_pos-txt_sz*1.2-h*wnd_mrg) - (prompt_y_max); 
-        if(img_wd>w*0.6){img_wd=w*0.6;}
+        if(img_wd>w*0.8){img_wd=w*0.8;}
         img_x_pos = w/2; img_y_pos = ( (opt_y_pos-txt_sz*1.2-h*wnd_mrg) + (prompt_y_max) )/2; 
 
     } 
