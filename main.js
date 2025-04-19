@@ -21,11 +21,15 @@ var game_position = 0;
 var mouse_state = [0,0]; // 0 = no click, 1 = click for [previous frame, current frame]
 
 // Color palette
-var color_screen_bkgd       = '#3c4042'; // for horizontal orientations, seperate background is shown
-var color_bkgd              = '#121212'; // dark mode background
-var color_prompt            = '#e0e0e0'; // pure white with 87% opacity applied
-var color_choice            = color_prompt;
-var color_choice_highlight  = '#86ce80'; // light green accent
+var color_screen_bkgd       = '#3c4042';      // for horizontal orientations, seperate background is shown
+var color_bkgd              = '#121212';      // dark mode background
+var color_prompt            = '#e0e0e0';      // pure white with 87% opacity applied
+var color_choice            = color_prompt;   // text for left and right choices
+var color_choice_highlight  = '#86ce80';      // light green accent
+var color_opt_line = color_choice_highlight;  // line over option text
+var color_title             = '#466744';      // title during game (mobile only)
+var color_title_highlight   = '#364933';      // tap title to restart (mobile only)
+
 
 // Graphics display
 var w, h;                           // screen dimensions
@@ -68,7 +72,7 @@ const pos_img_nums = [
     26509656
 ];                                  // list of all image numbers -> see Images folder
 var pos_imgs = [];                  // all images in game, to be preloaded                    
-var wnd_mrg = 0.05;                 // margin around screen as percentage of width and height
+var wnd_mrg = 0.03;                 // margin around screen as percentage of width and height
 
 
 
@@ -126,8 +130,9 @@ function draw() {
     mouse_state[0] = mouse_state[1];
 
     //fill(0,255,0);
-    //rect(0,h*wnd_mrg,w,1);
-    //(0,prompt_y_max,w,1);
+    //rect(0,opt_y_pos,w,1);
+    //rect(0,opt_y_pos-txt_sz*1.1-h*wnd_mrg*1,w,1);
+    //rect(0,prompt_y_max,w,1);
 }
 
 
@@ -147,15 +152,16 @@ function set_scale() {
         //if(txt_sz > 40){ txt_sz = 40; } // lower bound
         //if(txt_sz > 55){ txt_sz = 55; } // upper bound
         txt_sz = 65;
+        txt_sz = 30;
         title_txt_sz = 3*txt_sz;
 
         // Set text positions
         prompt_x_max = w - w*wnd_mrg*2; 
-        prompt_y_max = txt_sz * 3.5 + 2*h*wnd_mrg + txt_sz;
-        opt_x_pos = prompt_x_max/4+(w-prompt_x_max)/2; opt_y_pos = h-h*wnd_mrg*2; 
+        prompt_y_max = 1.3*txt_sz*4 + 2*h*wnd_mrg; // up to 4 lines of text, equal margin above and below
+        opt_x_pos = prompt_x_max/4+(w-prompt_x_max)/2; opt_y_pos = h-h*wnd_mrg - h*0.02; 
 
         // Set image size and position
-        img_wd = (opt_y_pos-txt_sz*1.2-h*wnd_mrg) - (prompt_y_max); 
+        img_wd = (opt_y_pos-txt_sz*1.3*2-2*h*wnd_mrg) - (prompt_y_max+h*wnd_mrg); 
         if(img_wd>w*0.8){img_wd=w*0.8;}
         img_x_pos = w/2; img_y_pos = ( (opt_y_pos-txt_sz*1.2-h*wnd_mrg) + (prompt_y_max) )/2; 
 
@@ -170,11 +176,11 @@ function set_scale() {
 
         // Set text positions
         prompt_x_max = w * 0.6; 
-        prompt_y_max = txt_sz * 3.5 + 2*h*wnd_mrg;
+        prompt_y_max = 1.3*txt_sz*3 + 2*h*wnd_mrg; // max 3 lines of text
         opt_x_pos = (prompt_x_max*1.1/4)+(w-prompt_x_max*1.1)/2; opt_y_pos = h-h*wnd_mrg*1.5; 
 
         // Set image size and position
-        img_wd = (opt_y_pos-txt_sz*1.1-h*wnd_mrg*1) - prompt_y_max;
+        img_wd = (opt_y_pos-txt_sz*1.3*2-2*h*wnd_mrg*1) - (prompt_y_max);
         if(img_wd>prompt_x_max*0.6){img_wd=prompt_x_max*0.6;}
         img_x_pos = w/2; img_y_pos = prompt_y_max + img_wd/2; 
  
@@ -198,23 +204,37 @@ function position_prompt(prompt_txt){
     // Displays prompt for current game position
 
     // General text parameters
-    textSize(txt_sz); fill(color_prompt); noStroke(); rectMode(CENTER); 
-    var prompt_y_pos 
+    textSize(txt_sz); fill(color_prompt); noStroke(); rectMode(CENTER); textAlign(LEFT, TOP); textFont(main_font);
+    var prompt_y_pos; 
     if(isMobile){
-      prompt_y_pos = h*wnd_mrg + txt_sz;
+      prompt_y_pos = h*wnd_mrg + txt_sz*1+(h*wnd_mrg);
     } else {
       prompt_y_pos = h*wnd_mrg;
     }
 
     // Prompt text
-    textAlign(LEFT, TOP); textFont(main_font);
-    text(prompt_txt, w/2, h*wnd_mrg, prompt_x_max);
+    text(prompt_txt.toUpperCase(), w/2, prompt_y_pos, prompt_x_max); // capitalize text, left justified
 
     // Title text (mobile only)
     if(isMobile){
       textAlign(CENTER, TOP); textFont(title_font);
+
+      // Display text
+      if(mouseY<prompt_y_max && mouse_state[1]==1) {
+        fill(color_title_highlight); // highlight title text when clicked
+      } else {
+        fill(color_title);
+      }
       text('ZENITH', w/2, h*wnd_mrg);
+
+      // Return to title screen
+      if(mouseY<prompt_y_max && mouse_state[0]==1 && mouse_state[1]==0){ // tap released
+        game_position = 0;  // return to title screen
+        mouse_state[0]=0;   // reset mouse states
+        mouse_state[1]=0;   // " "
+      }
     }
+
 }
 
 function display_img(image_number) {
@@ -243,28 +263,26 @@ function player_choice(left_txt, left_pos, right_txt, right_pos){
 
     // General text settings
     textSize(txt_sz); noStroke(); rectMode(CENTER); textAlign(CENTER, BOTTOM); textFont(main_font);
-    var option_txt_width = 0.8*prompt_x_max/2; // max width of text before wrapping to new line
+    var option_txt_width = 0.9*prompt_x_max/2; // max width of text before wrapping to new line
 
     // Display left option
-    if(mouse_state[1]==1 && mouseX < w/2){ // change color when text is highlighted
+    if(mouse_state[1]==1 && mouseX < w/2 && mouseY>prompt_y_max){ // change color when text is highlighted
         fill(color_choice_highlight);
     } else {
         fill(color_choice);
     }
     text(left_txt, opt_x_pos, opt_y_pos, option_txt_width);
 
-
     // Display right option
-    if(mouse_state[1]==1 && mouseX > w/2){
+    if(mouse_state[1]==1 && mouseX > w/2 && mouseY>prompt_y_max){
         fill(color_choice_highlight);
     } else {
         fill(color_choice);
     }
     text(right_txt, w-opt_x_pos, opt_y_pos, option_txt_width);
 
-
     // Button controls
-    if(mouse_state[0]==1 && mouse_state[1]==0){ // mouse/tap released
+    if(mouse_state[0]==1 && mouse_state[1]==0 && mouseY>prompt_y_max){ // mouse/tap released
         if(mouseX < w/2) { // left option
             game_position = left_pos;
         } 
@@ -272,6 +290,38 @@ function player_choice(left_txt, left_pos, right_txt, right_pos){
             game_position = right_pos;
         }
     }
+
+    // Option bars
+    var bar_y_min, bar_y_max, bar_wd;
+
+    // get bar width
+    var left_txt_wd, right_txt_wd, max_txt_wd;
+    rectMode(CORNER); textAlign(LEFT, TOP); textSize(txt_sz); 
+    left_txt_wd = textWidth(left_txt+'  ');     // draw text off screen to get dimensions
+    right_txt_wd = textWidth(right_txt+'  ');  // " "
+    if(left_txt_wd >= right_txt_wd) { // maximum width of option text
+      max_txt_wd = left_txt_wd;
+    } else {
+      max_txt_wd = right_txt_wd;
+    }
+    bar_wd = max_txt_wd * 1.1; // width of line over options
+    if(bar_wd > option_txt_width) { bar_wd = option_txt_width; } // bound size
+    // set bar positions
+    bar_y_min = opt_y_pos; // bottom of line
+    if(max_txt_wd>option_txt_width){ // move top of line if either option has text wrapped
+      bar_y_max = opt_y_pos - 2*1.3*txt_sz;
+    } else {
+      bar_y_max = opt_y_pos - 1.3*txt_sz;
+    }
+
+    //print(round(option_txt_width), round(left_txt_wd), round(right_txt_wd));
+    
+    stroke(color_choice); strokeWeight(1); 
+    line(opt_x_pos-bar_wd/2, bar_y_min, opt_x_pos+bar_wd/2, bar_y_min);
+    line(opt_x_pos-bar_wd/2, bar_y_max, opt_x_pos+bar_wd/2, bar_y_max);
+    line((w-opt_x_pos)-bar_wd/2, bar_y_min, (w-opt_x_pos)+bar_wd/2, bar_y_min);
+    line((w-opt_x_pos)-bar_wd/2, bar_y_max, (w-opt_x_pos)+bar_wd/2, bar_y_max);
+
 }
 
 
@@ -283,6 +333,12 @@ function title_screen(){
     textSize(title_txt_sz); fill(color_prompt); noStroke(); rectMode(CENTER); textAlign(CENTER, CENTER); textFont(title_font);
     let title_y_pos = (h*wnd_mrg + prompt_y_max)/2 - title_txt_sz*0.2; 
     text("ZENITH", w/2, title_y_pos);
+
+    // Subtitle (mobile only)
+    if(isMobile){
+      textFont(main_font); textSize(txt_sz); textAlign(CENTER, BOTTOM);
+      text("BY ANDREW SMITH", w/2, title_y_pos+title_txt_sz*1.1)
+    }
 
     // Instructions
     textFont(main_font); textSize(txt_sz); textAlign(CENTER, BOTTOM);
@@ -361,7 +417,7 @@ function game_positions() {
     switch (game_position) {
         
       case 1:
-        position_prompt("YOU APPROACH THE FOOT OF THE TRECHEROUS MT. ZENITH. THE PATH DIVIDES TWO WAYS. TAP THE LEFT OR RIGHT SIDE OF THE SCREEN TO DECIDE YOUR FATE.");
+        position_prompt("YOU APPROACH THE FOOT OF THE TRECHEROUS MT. ZENITH. THE PATH DIVIDES TWO WAYS. TAP THE LEFT OR RIGHT SIDE OF THE SCREEN TO BEGIN.");
         display_img(1); 
         player_choice("GO LEFT", 2, "GO RIGHT", 3);
         break;
