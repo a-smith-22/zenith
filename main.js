@@ -143,7 +143,8 @@ function set_scale() {
     if(isMobile){ // vertical format
 
         // Set text size
-        txt_sz = w*h*0.00008;     // scales with area
+        txt_sz = w*h*0.00008; // scales with area
+        if(txt_sz > 30){ txt_sz = 30; } // upper bound
         title_txt_sz = 3*txt_sz;
 
         // Set text positions
