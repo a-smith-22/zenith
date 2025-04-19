@@ -151,8 +151,8 @@ function set_scale() {
 
         // Set text positions
         prompt_x_max = w - w*wnd_mrg*2; 
-        prompt_y_max = txt_sz * 3.5 + 2*h*wnd_mrg;
-        opt_x_pos = prompt_x_max/4+(w-prompt_x_max)/2; opt_y_pos = h-h*wnd_mrg; 
+        prompt_y_max = txt_sz * 3.5 + 2*h*wnd_mrg + txt_sz;
+        opt_x_pos = prompt_x_max/4+(w-prompt_x_max)/2; opt_y_pos = h-h*wnd_mrg*2; 
 
         // Set image size and position
         img_wd = (opt_y_pos-txt_sz*1.2-h*wnd_mrg) - (prompt_y_max); 
@@ -197,8 +197,24 @@ function dsp_background(){
 function position_prompt(prompt_txt){
     // Displays prompt for current game position
 
-    textSize(txt_sz); fill(color_prompt); noStroke(); rectMode(CENTER); textAlign(LEFT, TOP); textFont(main_font);
+    // General text parameters
+    textSize(txt_sz); fill(color_prompt); noStroke(); rectMode(CENTER); 
+    var prompt_y_pos 
+    if(isMobile){
+      prompt_y_pos = h*wnd_mrg + txt_sz;
+    } else {
+      prompt_y_pos = h*wnd_mrg;
+    }
+
+    // Prompt text
+    textAlign(LEFT, TOP); textFont(main_font);
     text(prompt_txt, w/2, h*wnd_mrg, prompt_x_max);
+
+    // Title text (mobile only)
+    if(isMobile){
+      textAlign(CENTER, TOP); textFont(title_font);
+      text('ZENITH', w/2, h*wnd_mrg);
+    }
 }
 
 function display_img(image_number) {
@@ -225,15 +241,17 @@ function player_choice(left_txt, left_pos, right_txt, right_pos){
     // left_txt, right_txt = text to display on screen (will be capitalized)
     // left_pos, right_pos = position to send player if option is selected
 
+    // General text settings
     textSize(txt_sz); noStroke(); rectMode(CENTER); textAlign(CENTER, BOTTOM); textFont(main_font);
+    var option_txt_width = 0.8*prompt_x_max/2; // max width of text before wrapping to new line
 
     // Display left option
-    if(mouse_state[1]==1 && mouseX < w/2){
+    if(mouse_state[1]==1 && mouseX < w/2){ // change color when text is highlighted
         fill(color_choice_highlight);
     } else {
         fill(color_choice);
     }
-    text(left_txt, opt_x_pos, opt_y_pos);
+    text(left_txt, opt_x_pos, opt_y_pos, option_txt_width);
 
 
     // Display right option
@@ -242,7 +260,7 @@ function player_choice(left_txt, left_pos, right_txt, right_pos){
     } else {
         fill(color_choice);
     }
-    text(right_txt, w-opt_x_pos, opt_y_pos);
+    text(right_txt, w-opt_x_pos, opt_y_pos, option_txt_width);
 
 
     // Button controls
@@ -343,7 +361,7 @@ function game_positions() {
     switch (game_position) {
         
       case 1:
-        position_prompt("YOU APPROACH THE FOOT OF THE TRECHEROUS MT. ZENITH. THE PATH DIVIDES TWO WAYS. USE THE LEFT AND RIGHT ARROW KEYS TO CONTINUE.");
+        position_prompt("YOU APPROACH THE FOOT OF THE TRECHEROUS MT. ZENITH. THE PATH DIVIDES TWO WAYS. TAP THE LEFT OR RIGHT SIDE OF THE SCREEN TO DECIDE YOUR FATE.");
         display_img(1); 
         player_choice("GO LEFT", 2, "GO RIGHT", 3);
         break;
