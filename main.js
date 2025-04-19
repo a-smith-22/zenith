@@ -152,7 +152,6 @@ function set_scale() {
         //if(txt_sz > 40){ txt_sz = 40; } // lower bound
         //if(txt_sz > 55){ txt_sz = 55; } // upper bound
         txt_sz = 65;
-        txt_sz = 30;
         title_txt_sz = 3*txt_sz;
 
         // Set text positions
