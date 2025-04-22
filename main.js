@@ -7,6 +7,7 @@ VERSION HISTORY:
     (02/06/2022) V1.0.2 - Added the Zenith Main Theme Song (V1.2)
     (04/17/2022) V1.0.3 - Created ESC input to main code
     (04/18/2025) V1.1.0 - Remastered game for Javascript release
+    (04/21/2025) V1.1.1 - Added missing levels for Arcada fight and Galadore maze
 */
 
 // General settings
@@ -898,7 +899,7 @@ function game_positions() {
       case 964:
         position_prompt("THE ICESICKLES MELT BUT EXTINGUISH YOUR TORCH. YOU FIND A PIECE OF LADONIAN ORE.");
         display_img(450); 
-        player_choice("THROW AT CEILING", 1920, "THROW AT WALL", 1921);
+        player_choice("THROW AT CEILING", 1930, "THROW AT WALL", 1929);
         break;
         
       case 965:
@@ -1163,6 +1164,12 @@ function game_positions() {
         position_prompt("YOU REACH AN OPENING.");
         display_img(3236); 
         player_choice("GO EAST", 103552, "GO WEST", 103553);
+        break;
+
+      case 51777:
+        position_prompt("YOU REACH A DEAD END.");
+        display_img(3236); 
+        player_choice("RETRY", 3236, "RETRY", 3236);
         break;
         
       case 51779:
